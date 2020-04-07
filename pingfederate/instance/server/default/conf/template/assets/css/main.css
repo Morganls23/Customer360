@@ -4004,8 +4004,8 @@ html {
   background-color: #f7f7f7;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-color: #f7f7f7;
-  /* background-color: rgba(61, 69, 77, 0.9) \9; */
+  background-color: #3d454d;
+  /* background-color: rgba(61, 69, 77, 0.9) \9; *\
   /*IE9 hack */
   background-image: radial-gradient(40% 40%, circle cover, rgba(61, 69, 77, 0.9) 30%, #3d454d 80%);
   background-image: -o-radial-gradient(40% 40%, circle cover, rgba(61, 69, 77, 0.9) 30%, #3d454d 80%);
