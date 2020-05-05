@@ -15,6 +15,11 @@
 		{	"key": "sdkAppId",
 			"value": "74b5cc6f-576e-4b47-8bb7-4f7e8806f503",
 			"enabled": true
+		},
+		{
+				"key": "pingCentralHost",
+				"value": "https://cusmorg.ping-eng.com:9022",
+				"enabled": true
 		}
 	],
 	"_postman_variable_scope": "environment",
