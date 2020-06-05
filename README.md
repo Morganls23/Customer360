@@ -13,34 +13,14 @@ The Ping **Customer360** Solution provides a CIAM package for PingDirectory \ Pi
 ## Deployment
 This repo contains 2 configuration sets for deployment:
 * [Docker Compose](deployment/Compose)
-* [Kubernetes](deployment/K8s)
+* [Kubernetes](deployment/Kubernetes)
 
 ## Deployment Configuration
 
 The bulk of the configuration is performed by a Postman API Collection:  
 https://documenter.getpostman.com/view/1239082/SzRw2Axv
 
-**Note:** The collection has a set of default variables defined - to override them, place them in the `postman_vars.json` file.
-
-**Collection Defaults**
-| Variable | Description | Default |
-| -------- | ----------- | ------- |
-| `pfAdminURL` | PingFed Administration URL | https://pingfederate:9999 |
-| `pdAdminUrl` | PingDir Administration URL | https://pingdirectory:443 |
-| `pfAdmin` | PingFed API Admin Account | api-admin |
-| `pfAdminPwd` | PingFed API Admin Password| {{globalPwd}} |
-| `pdAdmin` | PingFed Admin Account | cn=dmanager |
-| `pdAdminPwd` | PingDir Admin Password| {{globalPwd}} |
-| `oauthSecret` | PingLogon Client Secret | {{globalPwd}} |
-| `pfAuthnApiUrl` | PF AuthN App URL | {{pfBaseURL}}/pf-ws/authn/explorer |
-| `globalPwd` | Global Password | 2FederateM0re |
-
-**Compose - `postman_vars.json`** or **K8s - `pingconfig-cm0-configmap.yaml`**
-| Variable | Description | Customer Values |
-| -------- | ----------- | ------- |
-| `pfBaseURL` | PingFed Runtime URL | https://{{your PF public FQDN}}:9031 |
-| `pingIdSdk` | PingID SDK Properties  | Your SDK Properties file |
-| `sdkAppId` | PID SDK Application ID | Your SDK App ID |
+[Environment Variables](deployment)
 
 ## Post-Deployment Considerations
 This Solution leverages **unsecured** LDAP between PingFederate and PingDirectory as it launches.  
@@ -82,14 +62,17 @@ To enabled LDAPS, follow these steps:
 ## Solution Configuration
 
 ### Administrator Consoles
-* PingFederate -- https://{{PF_HOSTNAME}}:9999/pingfederate
-* PingDirectory -- https://{{PD_HOSTNAME}}:8443/console
-* PingID SDK -- https://admin.pingone.com
+| Product | Console URL |
+| ----- | ----- |
+| PingCentral | https://{{PC_HOSTNAME}}:9022
+| PingFederate | https://{{PF_HOSTNAME}}:9999/pingfederate |
+| PingDirectory | https://{{PD_HOSTNAME}}:8443/console |
+| PingID | https://admin.pingone.com |
 
 ### PingFederate
 ---
 To access the Admin UI for PF go to:  
-https://{{PF_HOSTNAME}}:9999/pingfederate
+`https://{{PF_HOSTNAME}}:9999/pingfederate`
 
 Credentials (LDAP):  
 `Administrator` / `2FederateM0re`
@@ -97,9 +80,18 @@ Credentials (LDAP):
 This configuration includes:
 
 ### Adapters
+* HTML Form
 * HTML Form with LIP
 * Identifier-First (Passwordless)
 * PingID SDK
+
+**Social Logon**
+* Apple (not configured)
+* Facebook (can be configured in Environment)
+* Google (can be configured in Environment)
+* LinkedIn (not configured)
+
+**Risk \ ID Proofing**
 * iOvation IK (not configured)
 * ID Data Web IK (not configured)
 
@@ -119,9 +111,10 @@ The PingID SDK Connector is also configured to automatically enroll any User wit
 
 ### AuthN Policy - Default AuthN Experiences
 Extended Property Selector
-* `Basic` (HTML Form with LIP)
+* `Basic` (HTML Form with LIP & Social [`Google` | `Facebook`] & QR Code [PID SDK Mobile App])
 * `MFA` (HTML Form with LIP --> PingID SDK)
 * `Passwordless` (ID-First --> PingID SDK)
+* `Internal` (HTML Form)
 
 ### AuthN Policy - Default AuthN API
 Extended Property Selector
@@ -129,7 +122,7 @@ Extended Property Selector
 
 ### AuthN Policy - Failback
 Used for anything without an Ext Prop -- i.e. LIP Profile Management
-* HTML Form with LIP
+* HTML Form with LIP & Social [`Google` | `Facebook`] & QR Code [PID SDK Mobile App]
 
 ### AuthN Policy - Forgot Password
 Used to allow PID SDK for SSPR
@@ -138,9 +131,10 @@ Used to allow PID SDK for SSPR
 The Authentication Experience is controlled by setting the `Extended Properties` on the Application.   
 
 ### Extended Properties
-* `Enhanced` (HTML Form with LIP --  Facebook [not configured] & QR Code buttons) *default*
+* `Basic` (HTML Form with LIP & Social [`Google` | `Facebook`] & QR Code [PID SDK Mobile App]) *default*
 * `MFA` (HTML Form with LIP --> PingID SDK adapter)
 * `Passwordless` (ID-First --> PingID SDK)
+* `Internal` (HTML Form)
 
 ### Authentication API
 The AuthN API is enabled -- a value in the Extended Property of `API` will trigger it.
@@ -170,6 +164,36 @@ https://`${PF_BASE_URL}`/idp/startSSO.ping?PartnerSpId=Dummy-SAML
 
 ### Users
 `user.[0-4]` / `2FederateM0re`
+
+### OAuth Playground
+The PingFed OAuth Playground is also deployed in the Solution - it can be started with this URL:  
+https://{{PF_HOSTNAME}}:9031/OAuthPlayground
+
+To configure PingFed with the necessary components, use the `Setup` button:
+
+* Admin Host: `{{PF_HOSTNAME}}:9999`
+* Cert Errors: `Ignore`
+* Admin User: `api-admin`
+* Admin Pwd: `2FederateM0re`
+
+---
+### PingCentral
+To access the Admin Console for PC go to:  
+https://{{PC_HOSTNAME}}:9022
+
+User Credentials:
+* `Administrator` / `2FederateM0re`
+* `appowner.0` / `2FederateM0re`
+* `appowner.1` / `2FederateM0re`
+
+Access to PingCentral is controlled on the `employeeType` of the PS User - it's pulled with the OIDC Policy used by the PingCentral OIDC client.
+
+PingCentral is not wired to any environment to begin with - but it will pull in the apps that are wired up in Customer360:
+
+PingFed Environment:
+* `PingFederate Admin`: `pingfederate:9999`
+* `PingFederate Admin Username`: `api-admin`
+* `PingFederate Admin Password`: `2FederateM0re`
 
 ---
 ### PingDirectory
